@@ -1216,17 +1216,7 @@ ORDER BY type_order ASC
 
               <th colspan="2">
 
-                <input id="offline" type="radio" name="payment_method" value="pay_offline" <?php if ($enable_paypal == "no" and $enable_stripe == "no") {
-                                                                                              echo "checked";
-                                                                                            } ?>>
 
-                <label for="offline"> Pay Offline </label>
-
-                <p id="offline_desc" class="text-muted">
-
-                  Your order will not be shipped until the funds have cleared in our account.
-
-                </p>
 
               </th>
 
@@ -1239,7 +1229,7 @@ ORDER BY type_order ASC
 
                 <th colspan="2">
 
-                  <input id="pesapal" type="radio" name="payment_method" value="pesapal" checked>
+                  <input id="pesapal" type="radio" name="payment_method" value="pesapal">
 
 
                   <label for="paypal"> PesaPal </label>
@@ -1260,16 +1250,7 @@ ORDER BY type_order ASC
 
               <tr>
 
-                <th colspan="2">
 
-                  <input id="umspay" type="radio" name="payment_method" value="umspay" checked>
-
-                  <label for="umspay">Ums Pay</label>
-
-                  <p id="umspay_desc" class="text-muted">
-
-                    Your order will not be shipped until the funds have cleared in our account.
-                  </p>
 
                 </th>
 
@@ -1283,15 +1264,7 @@ ORDER BY type_order ASC
 
                 <th colspan="2">
 
-                  <input id="stripe" type="radio" name="payment_method" value="stripe" <?php if ($enable_paypal == "no") {
-                                                                                          echo "checked";
-                                                                                        } ?>>
 
-                  <label for="stripe">Credit Card (Stripe)</label>
-
-                  <p id="stripe_desc" class="text-muted">
-                    Pay with your credit card via Stripe. TEST MODE ENABLED. In test mode, you can use the card number 4242424242424242 with any CVC and a valid expiration date or check the documentation "Testing Stripe" for more card numbers.
-                  </p>
 
                 </th>
 
@@ -1454,7 +1427,7 @@ ORDER BY type_order ASC
                   <form id="pesapal_form" action="pesapal_charge.php" method="post">
                     <input type="text" name="phone_number" placeholder="Enter Phone Number" class="form-control" required>
                     <input type="hidden" name="total_amount" value="<?php echo $total_cart_price; ?>">
-                    <input type="submit" id="pesa-submit" class="btn btn-success btn-lg" value="Procced With PesaPal" style="border-radius:0px;">
+                    <input type="submit" id="pesa-submit" class="btn btn-success btn-lg" value="Proceed With PesaPal" style="border-radius:0px;">
                   </form>
                 <?php } ?>
 
@@ -1497,7 +1470,7 @@ ORDER BY type_order ASC
                   <form id="umspay_form" action="umspay_charge.php" method="post">
                     <input type="text" name="phone_number" placeholder="Enter Phone Number" class="form-control" required>
                     <input type="hidden" name="total_amount" value="<?php echo $total_cart_price; ?>">
-                    <input type="submit" id="pesa-submit" class="btn btn-success btn-lg" value="Procced With Ums Pay" style="border-radius:0px;">
+
                   </form>
                 <?php } ?>
 
