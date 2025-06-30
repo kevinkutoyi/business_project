@@ -10,7 +10,7 @@ $customer_email = $_SESSION['customer_email'];
 
 $select_customer = "select * from customers where customer_email='$customer_email'";
 
-$run_customer = mysqli_query($con,$select_customer);
+$run_customer = mysqli_query($con, $select_customer);
 
 $row_customer = mysqli_fetch_array($run_customer);
 
@@ -20,7 +20,7 @@ $customer_contact = $row_customer['customer_contact'];
 
 $select_payment_settings = "select * from payment_settings";
 
-$run_payment_settings = mysqli_query($con,$select_payment_settings);
+$run_payment_settings = mysqli_query($con, $select_payment_settings);
 
 $row_payment_settings = mysqli_fetch_array($run_payment_settings);
 
@@ -34,29 +34,29 @@ $paypal_sandbox = $row_payment_settings['paypal_sandbox'];
 
 $enable_stripe = $row_payment_settings['enable_stripe'];
 
-if($paypal_sandbox == "on"){
-	
-$paypal_url = "https://www.sandbox.paypal.com/cgi-bin/webscr";
-	
-}elseif($paypal_sandbox == "off"){
-	
-$paypal_url = "https://www.paypal.com/cgi-bin/webscr";	
-	
+$enable_pesapal = $row_payment_settings['enable_pesapal'];
+
+if ($paypal_sandbox == "on") {
+
+  $paypal_url = "https://www.sandbox.paypal.com/cgi-bin/webscr";
+} elseif ($paypal_sandbox == "off") {
+
+  $paypal_url = "https://www.paypal.com/cgi-bin/webscr";
 }
 
 $get_customers_addresses = "select * from customers_addresses where customer_id='$customer_id'";
 
-$run_customers_addresses = mysqli_query($con,$get_customers_addresses);
+$run_customers_addresses = mysqli_query($con, $get_customers_addresses);
 
 $row_addresses = mysqli_fetch_array($run_customers_addresses);
 
-$billing_country = $row_addresses["billing_country"];
+$billing_country = $row_addresses["billing_country"] ?? '';
 
-$billing_postcode = $row_addresses["billing_postcode"];
+$billing_postcode = $row_addresses["billing_postcode"] ?? '';
 
-$shipping_country = $row_addresses["shipping_country"];
+$shipping_country = $row_addresses["shipping_country"] ?? '';
 
-$shipping_postcode = $row_addresses["shipping_postcode"];
+$shipping_postcode = $row_addresses["shipping_postcode"] ?? '';
 
 $physical_products = array();
 
@@ -64,34 +64,31 @@ $ip_add = getRealUserIp();
 
 $select_cart = "select * from cart where ip_add='$ip_add'";
 
-$run_cart = mysqli_query($con,$select_cart);
+$run_cart = mysqli_query($con, $select_cart);
 
-while($row_cart = mysqli_fetch_array($run_cart)){
-	
-$product_id = $row_cart['p_id'];
+while ($row_cart = mysqli_fetch_array($run_cart)) {
 
-$product_type = $row_cart['product_type'];
+  $product_id = $row_cart['p_id'];
 
-$select_product = "select * from products where product_id='$product_id'";
+  $product_type = $row_cart['product_type'];
 
-$run_product = mysqli_query($con,$select_product);
+  $select_product = "select * from products where product_id='$product_id'";
 
-$row_product = mysqli_fetch_array($run_product);
+  $run_product = mysqli_query($con, $select_product);
 
-$vendor_id = $row_product['vendor_id'];
+  $row_product = mysqli_fetch_array($run_product);
 
-if($product_type == "physical_product"){
+  $vendor_id = $row_product['vendor_id'];
 
-if(!isset($physical_products[$vendor_id])){
+  if ($product_type == "physical_product") {
 
-$physical_products[$vendor_id] = array();
-	
-}
+    if (!isset($physical_products[$vendor_id])) {
 
-array_push($physical_products[$vendor_id], $product_id);	
+      $physical_products[$vendor_id] = array();
+    }
 
-}
-
+    array_push($physical_products[$vendor_id], $product_id);
+  }
 }
 
 ?>
@@ -107,183 +104,176 @@ $vendors_ids = array();
 
 $select_cart = "select * from cart where ip_add='$ip_add'";
 
-$run_cart = mysqli_query($con,$select_cart);
+$run_cart = mysqli_query($con, $select_cart);
 
-while($row_cart = mysqli_fetch_array($run_cart)){
+while ($row_cart = mysqli_fetch_array($run_cart)) {
 
-$cart_id = $row_cart['cart_id'];
+  $cart_id = $row_cart['cart_id'];
 
-$product_id = $row_cart['p_id'];
+  $product_id = $row_cart['p_id'];
 
-$product_qty = $row_cart['qty'];
+  $product_qty = $row_cart['qty'];
 
-$product_price = $row_cart['p_price'];
+  $product_price = $row_cart['p_price'];
 
-$product_weight = $row_cart['product_weight'];
+  $product_weight = $row_cart['product_weight'];
 
-$get_products = "select * from products where product_id='$product_id'";
+  $get_products = "select * from products where product_id='$product_id'";
 
-$run_products = mysqli_query($con,$get_products);
+  $run_products = mysqli_query($con, $get_products);
 
-$row_products = mysqli_fetch_array($run_products);
+  $row_products = mysqli_fetch_array($run_products);
 
-$vendor_id = $row_products['vendor_id'];
+  $vendor_id = $row_products['vendor_id'];
 
-$product_title = $row_products['product_title'];
+  $product_title = $row_products['product_title'];
 
-if(!empty($vendor_id)){
-	
-if(!in_array($vendor_id, $vendors_ids)){
+  if (!empty($vendor_id)) {
 
-array_push($vendors_ids, $vendor_id);
+    if (!in_array($vendor_id, $vendors_ids)) {
 
-}
+      array_push($vendors_ids, $vendor_id);
+    }
+  }
 
-}
+  $sub_total = $product_price * $product_qty;
 
-$sub_total = $product_price * $product_qty;
+  $total += $sub_total;
 
-$total += $sub_total;
+  $sub_total_weight = $product_weight * $product_qty;
 
-$sub_total_weight = $product_weight * $product_qty;
+  @$total_weight[$vendor_id] += $sub_total_weight;
 
-@$total_weight[$vendor_id] += $sub_total_weight;
+  if (strpos($vendor_id, "admin_") !== false) {
 
-if(strpos($vendor_id, "admin_") !== false){
-	
-$admin_id = trim($vendor_id, "admin_");
-	
-$get_admin = "select * from admins where admin_id='$admin_id'";
+    $admin_id = trim($vendor_id, "admin_");
 
-$run_admin = mysqli_query($con,$get_admin);
+    $get_admin = "select * from admins where admin_id='$admin_id'";
 
-$row_admin = mysqli_fetch_array($run_admin);
+    $run_admin = mysqli_query($con, $get_admin);
 
-$vendor_name = $row_admin['admin_name'];
-	
-}else{
+    $row_admin = mysqli_fetch_array($run_admin);
 
-$get_customer = "select * from customers where customer_id='$vendor_id'";
+    $vendor_name = $row_admin['admin_name'];
+  } else {
 
-$run_customer = mysqli_query($con,$get_customer);
+    $get_customer = "select * from customers where customer_id='$vendor_id'";
 
-$row_customer = mysqli_fetch_array($run_customer);
+    $run_customer = mysqli_query($con, $get_customer);
 
-$vendor_name = $row_customer['customer_name'];
+    $row_customer = mysqli_fetch_array($run_customer);
 
-}
+    $vendor_name = $row_customer['customer_name'];
+  }
 
 ?>
 
-<tr>
+  <tr>
 
-<td>
+    <td>
 
-<a href="#" class="bold"> <?php echo $product_title; ?> </a>
+      <a href="#" class="bold"> <?php echo $product_title; ?> </a>
 
-<i class="fa fa-times" title="Product Qty"></i> <?php echo $product_qty; ?>
+      <i class="fa fa-times" title="Product Qty"></i> <?php echo $product_qty; ?>
 
-<p class="cart-product-meta"> 
+      <p class="cart-product-meta">
 
-<?php
+        <?php
 
-$cart_meta = "";
+        $cart_meta = "";
 
-$select_cart_meta = "select * from cart_meta where ip_add='$ip_add' and cart_id='$cart_id' and product_id='$product_id' and not meta_key='variation_id'";
+        $select_cart_meta = "select * from cart_meta where ip_add='$ip_add' and cart_id='$cart_id' and product_id='$product_id' and not meta_key='variation_id'";
 
-$run_cart_meta = mysqli_query($con,$select_cart_meta);
+        $run_cart_meta = mysqli_query($con, $select_cart_meta);
 
-while($row_cart_meta = mysqli_fetch_array($run_cart_meta)){
+        while ($row_cart_meta = mysqli_fetch_array($run_cart_meta)) {
 
-$meta_key = ucwords($row_cart_meta["meta_key"]);
+          $meta_key = ucwords($row_cart_meta["meta_key"]);
 
-$meta_value = $row_cart_meta["meta_value"];
+          $meta_value = $row_cart_meta["meta_value"];
 
-$cart_meta .= "$meta_key: <span class='text-muted'> $meta_value </span>, ";
+          $cart_meta .= "$meta_key: <span class='text-muted'> $meta_value </span>, ";
+        }
 
-}
+        echo rtrim($cart_meta, ", ");
 
-echo rtrim($cart_meta,", ");
+        ?>
 
-?>
+      </p>
 
-</p>
+      <p style="margin-top:6px; margin-bottom:-1px;">
 
-<p style="margin-top:6px; margin-bottom:-1px;"> 
+        <strong> Vendor : </strong> <?php echo $vendor_name; ?>
 
-<strong> Vendor : </strong> <?php echo $vendor_name; ?> 
+      </p>
 
-</p>
+    </td>
 
-</td>
+    <th>$<?php echo $sub_total; ?></th>
 
-<th>$<?php echo $sub_total; ?></th>
-
-</tr>
+  </tr>
 
 <?php } ?>
 
 <tr>
 
-<th class="text-muted">Subtotal:</th>
+  <th class="text-muted">Subtotal:</th>
 
-<th>$<?php echo $total; ?></th>
+  <th>$<?php echo $total; ?></th>
 
 </tr>
 
-<?php if(count($physical_products) > 0 ){ ?>
+<?php if (count($physical_products) > 0) { ?>
 
-<tr>
+  <tr>
 
-<th colspan="2">
+    <th colspan="2">
 
-<p class="shipping-header text-muted"> <i class="fa fa-truck"></i> Shipping: </p>
+      <p class="shipping-header text-muted"> <i class="fa fa-truck"></i> Shipping: </p>
 
-<ul class="shipping-ul-list list-unstyled">
+      <ul class="shipping-ul-list list-unstyled">
 
-<?php
+        <?php
 
-foreach($vendors_ids as $vendor_id){
-	
-if( isset($physical_products[$vendor_id]) ){
-	
-$shipping_zone_id = "";
-	
-if(strpos($vendor_id, "admin_") !== false){
-	
-$admin_id = trim($vendor_id, "admin_");
-	
-$get_admin = "select * from admins where admin_id='$admin_id'";
+        foreach ($vendors_ids as $vendor_id) {
 
-$run_admin = mysqli_query($con,$get_admin);
+          if (isset($physical_products[$vendor_id])) {
 
-$row_admin = mysqli_fetch_array($run_admin);
+            $shipping_zone_id = "";
 
-$vendor_name = $row_admin['admin_name'];
-	
-}else{
+            if (strpos($vendor_id, "admin_") !== false) {
 
-$get_customer = "select * from customers where customer_id='$vendor_id'";
+              $admin_id = trim($vendor_id, "admin_");
 
-$run_customer = mysqli_query($con,$get_customer);
+              $get_admin = "select * from admins where admin_id='$admin_id'";
 
-$row_customer = mysqli_fetch_array($run_customer);
+              $run_admin = mysqli_query($con, $get_admin);
 
-$vendor_name = $row_customer['customer_name'];
+              $row_admin = mysqli_fetch_array($run_admin);
 
-}
+              $vendor_name = $row_admin['admin_name'];
+            } else {
 
-?>
+              $get_customer = "select * from customers where customer_id='$vendor_id'";
 
-<div class="shipping-vendor-header"> <?php echo $vendor_name; ?> Shipping: </div>
+              $run_customer = mysqli_query($con, $get_customer);
 
-<?php
+              $row_customer = mysqli_fetch_array($run_customer);
 
-if(@$_SESSION["is_shipping_address"] == "yes"){
+              $vendor_name = $row_customer['customer_name'] ?? '';
+            }
 
-if(empty($billing_country) and empty($billing_postcode)){
+        ?>
 
-echo "
+            <div class="shipping-vendor-header"> <?php echo $vendor_name; ?> Shipping: </div>
+
+            <?php
+
+            if (@$_SESSION["is_shipping_address"] == "yes") {
+
+              if (empty($billing_country) and empty($billing_postcode)) {
+
+                echo "
 
 <li> 
 
@@ -292,74 +282,65 @@ echo "
 </li>
 
 ";
+              }
 
-}
+              $select_zones = "select * from zones where vendor_id='$vendor_id' order by zone_order DESC";
 
-$select_zones = "select * from zones where vendor_id='$vendor_id' order by zone_order DESC";
+              $run_zones = mysqli_query($con, $select_zones);
 
-$run_zones = mysqli_query($con,$select_zones);
+              while ($row_zones = mysqli_fetch_array($run_zones)) {
 
-while($row_zones = mysqli_fetch_array($run_zones)){
+                $zone_id = $row_zones['zone_id'];
 
-$zone_id = $row_zones['zone_id'];
+                $select_zone_locations = "select DISTINCT zone_id from zones_locations where zone_id='$zone_id' and (location_code='$billing_country' and location_type='country')";
 
-$select_zone_locations = "select DISTINCT zone_id from zones_locations where zone_id='$zone_id' and (location_code='$billing_country' and location_type='country')";
+                $run_zones_locations = mysqli_query($con, $select_zone_locations);
 
-$run_zones_locations = mysqli_query($con,$select_zone_locations);
- 
-$count_zones_locations = mysqli_num_rows($run_zones_locations);
+                $count_zones_locations = mysqli_num_rows($run_zones_locations);
 
-if($count_zones_locations != "0"){
-	
-$row_zones_locations = mysqli_fetch_array($run_zones_locations);
+                if ($count_zones_locations != "0") {
 
-$zone_id = $row_zones_locations["zone_id"];	
+                  $row_zones_locations = mysqli_fetch_array($run_zones_locations);
 
-$select_zone_shipping = "select * from shipping where shipping_zone='$zone_id'";
+                  $zone_id = $row_zones_locations["zone_id"];
 
-$run_zone_shipping = mysqli_query($con,$select_zone_shipping);
+                  $select_zone_shipping = "select * from shipping where shipping_zone='$zone_id'";
 
-$count_zone_shipping = mysqli_num_rows($run_zone_shipping);
+                  $run_zone_shipping = mysqli_query($con, $select_zone_shipping);
 
-if($count_zone_shipping != "0"){
+                  $count_zone_shipping = mysqli_num_rows($run_zone_shipping);
 
-$select_zone_postcodes = "select * from zones_locations where zone_id='$zone_id' and location_type='postcode'";
+                  if ($count_zone_shipping != "0") {
 
-$run_zones_postcodes = mysqli_query($con,$select_zone_postcodes);
+                    $select_zone_postcodes = "select * from zones_locations where zone_id='$zone_id' and location_type='postcode'";
 
-$count_zones_postcodes = mysqli_num_rows($run_zones_postcodes);
+                    $run_zones_postcodes = mysqli_query($con, $select_zone_postcodes);
 
-if($count_zones_postcodes != "0"){
+                    $count_zones_postcodes = mysqli_num_rows($run_zones_postcodes);
 
-while($row_zones_postcodes = mysqli_fetch_array($run_zones_postcodes)){
+                    if ($count_zones_postcodes != "0") {
 
-$location_code = $row_zones_postcodes["location_code"];
+                      while ($row_zones_postcodes = mysqli_fetch_array($run_zones_postcodes)) {
 
-if($location_code == $billing_postcode){
+                        $location_code = $row_zones_postcodes["location_code"];
 
-$shipping_zone_id = $zone_id;
-	
-}
+                        if ($location_code == $billing_postcode) {
 
-}
+                          $shipping_zone_id = $zone_id;
+                        }
+                      }
+                    } else {
 
-}else{
+                      $shipping_zone_id = $zone_id;
+                    }
+                  }
+                }
+              }
+            } elseif (@$_SESSION["is_shipping_address"] == "no") {
 
-$shipping_zone_id = $zone_id;
-	
-}
+              if (empty($shipping_country) and empty($shipping_postcode)) {
 
-}
-
-}
-
-}
-	
-}elseif(@$_SESSION["is_shipping_address"] == "no"){
-	
-if(empty($shipping_country) and empty($shipping_postcode)){
-
-echo "
+                echo "
 
 <li> 
 
@@ -368,74 +349,65 @@ echo "
 </li>
 
 ";
+              }
 
-}
+              $select_zones = "select * from zones where vendor_id='$vendor_id' order by zone_order DESC";
 
-$select_zones = "select * from zones where vendor_id='$vendor_id' order by zone_order DESC";
+              $run_zones = mysqli_query($con, $select_zones);
 
-$run_zones = mysqli_query($con,$select_zones);
+              while ($row_zones = mysqli_fetch_array($run_zones)) {
 
-while($row_zones = mysqli_fetch_array($run_zones)){
+                $zone_id = $row_zones['zone_id'];
 
-$zone_id = $row_zones['zone_id'];
+                $select_zone_locations = "select DISTINCT zone_id from zones_locations where zone_id='$zone_id' and (location_code='$shipping_country' and location_type='country')";
 
-$select_zone_locations = "select DISTINCT zone_id from zones_locations where zone_id='$zone_id' and (location_code='$shipping_country' and location_type='country')";
+                $run_zones_locations = mysqli_query($con, $select_zone_locations);
 
-$run_zones_locations = mysqli_query($con,$select_zone_locations);
- 
-$count_zones_locations = mysqli_num_rows($run_zones_locations);
+                $count_zones_locations = mysqli_num_rows($run_zones_locations);
 
-if($count_zones_locations != "0"){
-	
-$row_zones_locations = mysqli_fetch_array($run_zones_locations);
+                if ($count_zones_locations != "0") {
 
-$zone_id = $row_zones_locations["zone_id"];	
+                  $row_zones_locations = mysqli_fetch_array($run_zones_locations);
 
-$select_zone_shipping = "select * from shipping where shipping_zone='$zone_id'";
+                  $zone_id = $row_zones_locations["zone_id"];
 
-$run_zone_shipping = mysqli_query($con,$select_zone_shipping);
+                  $select_zone_shipping = "select * from shipping where shipping_zone='$zone_id'";
 
-$count_zone_shipping = mysqli_num_rows($run_zone_shipping);
+                  $run_zone_shipping = mysqli_query($con, $select_zone_shipping);
 
-if($count_zone_shipping != "0"){
+                  $count_zone_shipping = mysqli_num_rows($run_zone_shipping);
 
-$select_zone_postcodes = "select * from zones_locations where zone_id='$zone_id' and location_type='postcode'";
+                  if ($count_zone_shipping != "0") {
 
-$run_zones_postcodes = mysqli_query($con,$select_zone_postcodes);
+                    $select_zone_postcodes = "select * from zones_locations where zone_id='$zone_id' and location_type='postcode'";
 
-$count_zones_postcodes = mysqli_num_rows($run_zones_postcodes);
+                    $run_zones_postcodes = mysqli_query($con, $select_zone_postcodes);
 
-if($count_zones_postcodes != "0"){
+                    $count_zones_postcodes = mysqli_num_rows($run_zones_postcodes);
 
-while($row_zones_postcodes = mysqli_fetch_array($run_zones_postcodes)){
+                    if ($count_zones_postcodes != "0") {
 
-$location_code = $row_zones_postcodes["location_code"];
+                      while ($row_zones_postcodes = mysqli_fetch_array($run_zones_postcodes)) {
 
-if($location_code == $shipping_postcode){
+                        $location_code = $row_zones_postcodes["location_code"];
 
-$shipping_zone_id = $zone_id;
-	
-}
+                        if ($location_code == $shipping_postcode) {
 
-}
+                          $shipping_zone_id = $zone_id;
+                        }
+                      }
+                    } else {
 
-}else{
+                      $shipping_zone_id = $zone_id;
+                    }
+                  }
+                }
+              }
+            } else {
 
-$shipping_zone_id = $zone_id;
-	
-}
+              if (empty($billing_country) and empty($billing_postcode)) {
 
-}
-
-}
-
-}	
-
-}else{
-
-if(empty($billing_country) and empty($billing_postcode)){
-
-echo "
+                echo "
 
 <li> 
 
@@ -444,66 +416,58 @@ echo "
 </li>
 
 ";
+              }
 
-}
+              $select_zones = "select * from zones where vendor_id='$vendor_id' order by zone_order DESC";
 
-$select_zones = "select * from zones where vendor_id='$vendor_id' order by zone_order DESC";
+              $run_zones = mysqli_query($con, $select_zones);
 
-$run_zones = mysqli_query($con,$select_zones);
+              while ($row_zones = mysqli_fetch_array($run_zones)) {
 
-while($row_zones = mysqli_fetch_array($run_zones)){
+                $zone_id = $row_zones['zone_id'];
 
-$zone_id = $row_zones['zone_id'];
+                $select_zone_locations = "select DISTINCT zone_id from zones_locations where zone_id='$zone_id' and (location_code='$billing_country' and location_type='country')";
 
-$select_zone_locations = "select DISTINCT zone_id from zones_locations where zone_id='$zone_id' and (location_code='$billing_country' and location_type='country')";
+                $run_zones_locations = mysqli_query($con, $select_zone_locations);
 
-$run_zones_locations = mysqli_query($con,$select_zone_locations);
- 
-$count_zones_locations = mysqli_num_rows($run_zones_locations);
+                $count_zones_locations = mysqli_num_rows($run_zones_locations);
 
-if($count_zones_locations != "0"){
-	
-$row_zones_locations = mysqli_fetch_array($run_zones_locations);
+                if ($count_zones_locations != "0") {
 
-$zone_id = $row_zones_locations["zone_id"];	
+                  $row_zones_locations = mysqli_fetch_array($run_zones_locations);
 
-$select_zone_postcodes = "select * from zones_locations where zone_id='$zone_id' and location_type='postcode'";
+                  $zone_id = $row_zones_locations["zone_id"];
 
-$run_zones_postcodes = mysqli_query($con,$select_zone_postcodes);
+                  $select_zone_postcodes = "select * from zones_locations where zone_id='$zone_id' and location_type='postcode'";
 
-$count_zones_postcodes = mysqli_num_rows($run_zones_postcodes);
+                  $run_zones_postcodes = mysqli_query($con, $select_zone_postcodes);
 
-if($count_zones_postcodes != "0"){
+                  $count_zones_postcodes = mysqli_num_rows($run_zones_postcodes);
 
-while($row_zones_postcodes = mysqli_fetch_array($run_zones_postcodes)){
+                  if ($count_zones_postcodes != "0") {
 
-$location_code = $row_zones_postcodes["location_code"];
+                    while ($row_zones_postcodes = mysqli_fetch_array($run_zones_postcodes)) {
 
-if($location_code == $billing_postcode){
+                      $location_code = $row_zones_postcodes["location_code"];
 
-$shipping_zone_id = $zone_id;
-	
-}
+                      if ($location_code == $billing_postcode) {
 
-}
+                        $shipping_zone_id = $zone_id;
+                      }
+                    }
+                  } else {
 
-}else{
+                    $shipping_zone_id = $zone_id;
+                  }
+                }
+              }
+            }
 
-$shipping_zone_id = $zone_id;
-	
-}
+            $shipping_weight = $total_weight[$vendor_id];
 
-}
+            if (!empty($shipping_zone_id)) {
 
-}	
-
-}
-
-$shipping_weight = $total_weight[$vendor_id];
-
-if(!empty($shipping_zone_id)){
-
-$select_shipping = "
+              $select_shipping = "
 SELECT *,
 IF (
 $shipping_weight > (
@@ -536,88 +500,81 @@ and vendor_id='$vendor_id'
 ORDER BY type_order ASC
 ";
 
-$run_shipping = mysqli_query($con,$select_shipping);
+              $run_shipping = mysqli_query($con, $select_shipping);
 
-$i = 0;
+              $i = 0;
 
-while($row_shipping = mysqli_fetch_array($run_shipping)){
-	
-$i++;
-	
-$type_id = $row_shipping["type_id"];
+              while ($row_shipping = mysqli_fetch_array($run_shipping)) {
 
-$type_name = $row_shipping["type_name"];
+                $i++;
 
-$type_default = $row_shipping["type_default"];
+                $type_id = $row_shipping["type_id"];
 
-$shipping_cost = $row_shipping["shipping_cost"];
+                $type_name = $row_shipping["type_name"];
 
-if(!empty($shipping_cost)){
-	
-?>	
+                $type_default = $row_shipping["type_default"];
 
-<li>
+                $shipping_cost = $row_shipping["shipping_cost"];
 
-<input type="radio" name="[<?php echo $vendor_id; ?>][shipping_type]" value="<?php echo $type_id; ?>" class="shipping_type" data-shipping_cost="<?php echo $shipping_cost; ?>"
+                if (!empty($shipping_cost)) {
 
-<?php  
-	
-if(@$_SESSION["shipping_type_$vendor_id"] == $type_id){
+            ?>
 
-$_SESSION["shipping_type_$vendor_id"] = $type_id;
+                  <li>
 
-$_SESSION["shipping_cost_$vendor_id"] = $shipping_cost;
+                    <input type="radio" name="[<?php echo $vendor_id; ?>][shipping_type]" value="<?php echo $type_id; ?>" class="shipping_type" data-shipping_cost="<?php echo $shipping_cost; ?>"
 
-echo "checked";
+                      <?php
 
-}elseif($i == 1){
+                      if (@$_SESSION["shipping_type_$vendor_id"] == $type_id) {
 
-echo "checked";
-	
-}
+                        $_SESSION["shipping_type_$vendor_id"] = $type_id;
 
-?>>
+                        $_SESSION["shipping_cost_$vendor_id"] = $shipping_cost;
 
-<span class="shipping-type-name"> 
+                        echo "checked";
+                      } elseif ($i == 1) {
 
-<?php echo $type_name; ?>: <span class="text-muted"> $<?php echo $shipping_cost; ?> </span> 
+                        echo "checked";
+                      }
 
-</span>
+                      ?>>
 
-</li>
+                    <span class="shipping-type-name">
+
+                      <?php echo $type_name; ?>: <span class="text-muted"> $<?php echo $shipping_cost; ?> </span>
+
+                    </span>
+
+                  </li>
 
 
-<?php
+                  <?php
 
-}
+                }
+              }
+            } else {
 
-}
+              if (!empty($billing_country) or !empty($shipping_country)) {
 
-}else{
-	
-if(!empty($billing_country) or !empty($shipping_country)){
-	
-if(@$_SESSION["is_shipping_address"] == "yes"){
-	
-$select_country_shipping = "select * from shipping where shipping_country='$billing_country'";
+                if (@$_SESSION["is_shipping_address"] == "yes") {
 
-}elseif(@$_SESSION["is_shipping_address"] == "no"){
-	
-$select_country_shipping = "select * from shipping where shipping_country='$shipping_country'";
-	
-}else{
+                  $select_country_shipping = "select * from shipping where shipping_country='$billing_country'";
+                } elseif (@$_SESSION["is_shipping_address"] == "no") {
 
-$select_country_shipping = "select * from shipping where shipping_country='$billing_country'";
+                  $select_country_shipping = "select * from shipping where shipping_country='$shipping_country'";
+                } else {
 
-}
+                  $select_country_shipping = "select * from shipping where shipping_country='$billing_country'";
+                }
 
-$run_country_shipping = mysqli_query($con,$select_country_shipping);
+                $run_country_shipping = mysqli_query($con, $select_country_shipping);
 
-$count_country_shipping = mysqli_num_rows($run_country_shipping);
+                $count_country_shipping = mysqli_num_rows($run_country_shipping);
 
-if($count_country_shipping == "0"){
+                if ($count_country_shipping == "0") {
 
-echo "
+                  echo "
 
 <li> 
 
@@ -626,12 +583,11 @@ echo "
 </li>
 
 ";
+                } else {
 
-}else{
-	
-if(@$_SESSION["is_shipping_address"] == "yes"){
+                  if (@$_SESSION["is_shipping_address"] == "yes") {
 
-$select_shipping = "
+                    $select_shipping = "
 SELECT *,
 IF (
 $shipping_weight > (
@@ -663,10 +619,9 @@ WHERE type_local = 'no'
 and vendor_id='$vendor_id'
 ORDER BY type_order ASC
 ";
+                  } elseif (@$_SESSION["is_shipping_address"] == "no") {
 
-}elseif(@$_SESSION["is_shipping_address"] == "no"){
-			
-$select_shipping = "
+                    $select_shipping = "
 SELECT *,
 IF (
 $shipping_weight > (
@@ -698,10 +653,9 @@ WHERE type_local = 'no'
 and vendor_id='$vendor_id'
 ORDER BY type_order ASC
 ";
+                  } else {
 
-}else{
-
-$select_shipping = "
+                    $select_shipping = "
 SELECT *,
 IF (
 $shipping_weight > (
@@ -733,494 +687,497 @@ WHERE type_local = 'no'
 and vendor_id='$vendor_id'
 ORDER BY type_order ASC
 ";
-	
-}
+                  }
 
-$run_shipping = mysqli_query($con,$select_shipping);
+                  $run_shipping = mysqli_query($con, $select_shipping);
 
-$i = 0;
+                  $i = 0;
 
-while($row_shipping = mysqli_fetch_array($run_shipping)){
-	
-$i++;
-	
-$type_id = $row_shipping["type_id"];
+                  while ($row_shipping = mysqli_fetch_array($run_shipping)) {
 
-$type_name = $row_shipping["type_name"];
+                    $i++;
 
-$type_default = $row_shipping["type_default"];
+                    $type_id = $row_shipping["type_id"];
 
-$shipping_cost = $row_shipping["shipping_cost"];
+                    $type_name = $row_shipping["type_name"];
 
-if(!empty($shipping_cost)){
-	
-?>	
+                    $type_default = $row_shipping["type_default"];
 
-<li>
+                    $shipping_cost = $row_shipping["shipping_cost"];
 
-<input type="radio" name="[<?php echo $vendor_id; ?>][shipping_type]" value="<?php echo $type_id; ?>" class="shipping_type" data-shipping_cost="<?php echo $shipping_cost; ?>"
+                    if (!empty($shipping_cost)) {
 
-<?php  
-	
-if(@$_SESSION["shipping_type_$vendor_id"] == $type_id){
+                  ?>
 
-$_SESSION["shipping_type_$vendor_id"] = $type_id;
+                      <li>
 
-$_SESSION["shipping_cost_$vendor_id"] = $shipping_cost;
+                        <input type="radio" name="[<?php echo $vendor_id; ?>][shipping_type]" value="<?php echo $type_id; ?>" class="shipping_type" data-shipping_cost="<?php echo $shipping_cost; ?>"
 
-echo "checked";
+                          <?php
 
-}elseif($i == 1){
+                          if (@$_SESSION["shipping_type_$vendor_id"] == $type_id) {
 
-echo "checked";
-	
-}
+                            $_SESSION["shipping_type_$vendor_id"] = $type_id;
 
-?>>
+                            $_SESSION["shipping_cost_$vendor_id"] = $shipping_cost;
 
-<span class="shipping-type-name"> 
+                            echo "checked";
+                          } elseif ($i == 1) {
 
-<?php echo $type_name; ?>: <span class="text-muted"> $<?php echo $shipping_cost; ?> </span> 
+                            echo "checked";
+                          }
 
-</span>
+                          ?>>
 
-</li>
+                        <span class="shipping-type-name">
 
-<?php
+                          <?php echo $type_name; ?>: <span class="text-muted"> $<?php echo $shipping_cost; ?> </span>
 
-}
+                        </span>
 
-}
-	
-}
+                      </li>
 
-}
+        <?php
 
-}
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
 
-}
+        $shipping_types = array();
 
-}
+        $total_shipping_cost = 0;
 
-$shipping_types = array();
+        if (count($physical_products) > 0) {
 
-$total_shipping_cost = 0;
+          foreach ($vendors_ids as $vendor_id) {
 
-if(count($physical_products) > 0 ){
-	
-foreach($vendors_ids as $vendor_id){
-	
-if( isset($physical_products[$vendor_id]) ){
-	
-if(isset($_SESSION["shipping_type_$vendor_id"]) and isset($_SESSION["shipping_cost_$vendor_id"])){
-	
-$shipping_types["$vendor_id"]["shipping_type"] = $_SESSION["shipping_type_$vendor_id"];
+            if (isset($physical_products[$vendor_id])) {
 
-$shipping_types["$vendor_id"]["shipping_cost"] = $_SESSION["shipping_cost_$vendor_id"];
+              if (isset($_SESSION["shipping_type_$vendor_id"]) and isset($_SESSION["shipping_cost_$vendor_id"])) {
 
-$total_shipping_cost += $_SESSION["shipping_cost_$vendor_id"];
+                $shipping_types["$vendor_id"]["shipping_type"] = $_SESSION["shipping_type_$vendor_id"];
 
-}
+                $shipping_types["$vendor_id"]["shipping_cost"] = $_SESSION["shipping_cost_$vendor_id"];
 
-}
-		
-}
+                $total_shipping_cost += $_SESSION["shipping_cost_$vendor_id"];
+              }
+            }
+          }
+        }
 
-}
+        $_SESSION["shipping_types"] = $shipping_types;
 
-$_SESSION["shipping_types"] = $shipping_types;
+        $_SESSION["shipping_cost"] = $total_shipping_cost;
 
-$_SESSION["shipping_cost"] = $total_shipping_cost;
+        $total_cart_price = $total + $total_shipping_cost;
 
-$total_cart_price = $total + $total_shipping_cost;
+        ?>
 
-?>
+      </ul>
 
-</ul>
+    </th>
 
-</th>
-
-</tr>
+  </tr>
 
 <?php } ?>
 
 <tr>
 
-<th class="text-muted">Tax:</th>
+  <th class="text-muted">Tax:</th>
 
-<th>$0</th>
+  <th>$0</th>
 
 </tr>
 
 
 <tr class="total">
 
-<td>Total:</td>
+  <td>Total:</td>
 
-<?php if(count($physical_products) > 0 ){ ?>
+  <?php if (count($physical_products) > 0) { ?>
 
-<th class="total-shipping-price">$<?php echo $total_cart_price; ?>.00</th>
+    <th class="total-shipping-price">$<?php echo $total_cart_price; ?>.00</th>
 
-<?php }else{ ?>
+  <?php } else { ?>
 
-<th class="total-shipping-price">$<?php echo $total; ?>.00</th>
+    <th class="total-shipping-price">$<?php echo $total; ?>.00</th>
 
-<?php } ?>
+  <?php } ?>
 
 </tr>
 
 <tr>
 
-<th colspan="2">
+  <th colspan="2">
 
-<input id="offline" type="radio" name="payment_method" value="pay_offline" 
+    <input id="offline" type="radio" name="payment_method" value="pay_offline"
 
-<?php if($_SESSION["payment_method"] == "pay_offline"){ echo "checked"; }?>> 
+      <?php if ($_SESSION["payment_method"] == "pay_offline") {
+        echo "checked";
+      } ?>>
 
-<label for="offline"> Pay Offline </label>
+    <label for="offline"> Pay Offline </label>
 
-<p id="offline_desc" class="text-muted">Make your payment directly into our bank account or Please send a check to Store Name, Store Street, Store Town, Store State / County, Store Postcode.</p>
+    <p id="offline_desc" class="text-muted">Make your payment directly into our bank account or Please send a check to Store Name, Store Street, Store Town, Store State / County, Store Postcode.</p>
 
-</th>
-
-</tr>
-
-<?php if($enable_stripe == "yes"){ ?>
-
-<tr>
-
-<th colspan="2">
-
-<input id="stripe" type="radio" name="payment_method" value="stripe"
-
-<?php if($_SESSION["payment_method"] == "stripe"){ echo "checked"; }?>> 
-
-<label for="stripe">Credit Card (Stripe)</label>
-
-<p id="stripe_desc" class="text-muted">Pay with your credit card via Stripe. TEST MODE ENABLED. In test mode, you can use the card number 4242424242424242 with any CVC and a valid expiration date or check the documentation "Testing Stripe" for more card numbers.</p>
-
-</th>
+  </th>
 
 </tr>
 
+<?php if ($enable_stripe == "yes") { ?>
+
+  <tr>
+
+    <th colspan="2">
+
+      <input id="stripe" type="radio" name="payment_method" value="stripe"
+
+        <?php if ($_SESSION["payment_method"] == "stripe") {
+          echo "checked";
+        } ?>>
+
+      <label for="stripe">Credit Card (Stripe)</label>
+
+      <p id="stripe_desc" class="text-muted">Pay with your credit card via Stripe. TEST MODE ENABLED. In test mode, you can use the card number 4242424242424242 with any CVC and a valid expiration date or check the documentation "Testing Stripe" for more card numbers.</p>
+
+    </th>
+
+  </tr>
+
 <?php } ?>
 
-<?php if($enable_paypal == "yes"){ ?>
+<?php if ($enable_paypal == "yes") { ?>
+
+  <tr>
+
+    <th colspan="2">
+
+      <input id="paypal" type="radio" name="payment_method" value="paypal"
+
+        <?php if ($_SESSION["payment_method"] == "paypal") {
+          echo "checked";
+        } ?>>
+
+      <label for="paypal">Paypal</label>
+
+      <p id="paypal_desc" class="text-muted">Pay via PayPal you can pay with your credit card if you don’t have a PayPal account.</p>
+
+    </th>
+
+  </tr>
+
+<?php } ?>
 
 <tr>
 
-<th colspan="2">
+  <td id="payment-forms-td" colspan="2">
 
-<input id="paypal" type="radio" name="payment_method" value="paypal" 
+    <form id="offline_form" action="order.php" method="post"><!-- offline Payment form Starts -->
 
-<?php if($_SESSION["payment_method"] == "paypal"){ echo "checked"; }?>> 
+      <?php if (count($physical_products) > 0) { ?>
 
-<label for="paypal">Paypal</label>
+        <input type="hidden" name="amount" value="<?php echo $total_cart_price; ?>">
 
-<p id="paypal_desc" class="text-muted">Pay via PayPal you can pay with your credit card if you don’t have a PayPal account.</p>
+      <?php } else { ?>
 
-</th>
+        <input type="hidden" name="amount" value="<?php echo $total; ?>">
 
-</tr>
+      <?php } ?>
 
-<?php } ?>
+      <input type="submit" id="offline-submit" name="submit" value="Place Order" class="btn btn-success btn-lg" style="border-radius:0px;">
 
-<tr>
+    </form><!-- offline Payment form Starts -->
 
-<td id="payment-forms-td" colspan="2">
 
-<form id="offline_form" action="order.php" method="post"><!-- offline Payment form Starts -->
+    <?php
 
-<?php if(count($physical_products) > 0 ){ ?>
+    if ($enable_stripe == "yes") {
 
-<input type="hidden" name="amount" value="<?php echo $total_cart_price; ?>" >
+      if (count($physical_products) > 0) {
 
-<?php }else{ ?>
+        $stripe_total_amount = $total_cart_price * 100;
+      } else {
 
-<input type="hidden" name="amount" value="<?php echo $total; ?>" >
+        $stripe_total_amount = $total;
+      }
 
-<?php } ?>
+      include("stripe_config.php");
 
-<input type="submit" id="offline-submit" name="submit" value="Place Order" class="btn btn-success btn-lg" style="border-radius:0px;">
+    ?>
 
-</form><!-- offline Payment form Starts -->
+      <form id="stripe_form" action="stripe_charge.php" method="post">
 
+        <input type="hidden" name="total_amount" value="<?php echo $total_cart_price; ?>">
 
-<?php
+        <input type="hidden" name="stripe_total_amount" value="<?php echo $stripe_total_amount; ?>">
 
-if($enable_stripe == "yes"){
+        <input
+          type="submit"
+          id="stripe-submit"
+          class="btn btn-success btn-lg"
+          value="Procced With Stripe"
+          style="border-radius:0px;"
+          data-name="Computerfever.com"
+          data-description="Pay With Credit Card"
+          data-image="images/stripe-logo.png"
+          data-key="<?php echo $stripe['publishable_key']; ?>"
+          data-amount="<?php echo $stripe_total_amount; ?>"
+          data-currency="<?php echo $stripe['currency_code']; ?>"
+          data-email="<?php echo $customer_email; ?>">
 
-if(count($physical_products) > 0 ){
+      </form>
 
-$stripe_total_amount = $total_cart_price * 100;
+    <?php } ?>
 
-}else{
+    <?php if ($enable_paypal == "yes") { ?>
 
-$stripe_total_amount = $total;
+      <form id="paypal_form" action="<?php echo $paypal_url; ?>" method="post"><!-- PayPal form Starts -->
 
-}
+        <input type="hidden" name="business" value="<?php echo $paypal_email; ?>">
 
-include("stripe_config.php");
+        <input type="hidden" name="cmd" value="_cart">
 
-?>
+        <input type="hidden" name="upload" value="1">
 
-<form id="stripe_form" action="stripe_charge.php" method="post">
+        <input type="hidden" name="currency_code" value="<?php echo $paypal_currency_code; ?>">
 
-<input type="hidden" name="total_amount" value="<?php echo $total_cart_price; ?>">
+        <?php if (count($physical_products) > 0) { ?>
 
-<input type="hidden" name="stripe_total_amount" value="<?php echo $stripe_total_amount; ?>">
+          <input type="hidden" name="return" value="http://localhost/ecommerce_project/paypal_order.php?c_id=<?php echo $customer_id; ?>&amount=<?php echo $total_cart_price; ?>">
 
-<input 
-type="submit" 
-id="stripe-submit"
-class="btn btn-success btn-lg"
-value="Procced With Stripe"
-style="border-radius:0px;"
-data-name="Computerfever.com"
-data-description="Pay With Credit Card"
-data-image="images/stripe-logo.png"
-data-key="<?php echo $stripe['publishable_key']; ?>" 
-data-amount="<?php echo $stripe_total_amount; ?>"
-data-currency="<?php echo $stripe['currency_code']; ?>"
-data-email="<?php echo $customer_email; ?>">
+        <?php } else { ?>
 
-</form>
+          <input type="hidden" name="return" value="http://localhost/ecommerce_project/paypal_order.php?c_id=<?php echo $customer_id; ?>&amount=<?php echo $total; ?>">
 
-<?php } ?>
+        <?php } ?>
 
-<?php if($enable_paypal == "yes"){ ?>
+        <input type="hidden" name="cancel_return" value="http://localhost/ecommerce_project/checkout.php">
 
-<form id="paypal_form" action="<?php echo $paypal_url; ?>" method="post"><!-- PayPal form Starts -->
+        <?php
 
-<input type="hidden" name="business" value="<?php echo $paypal_email; ?>">
+        $i = 0;
 
-<input type="hidden" name="cmd" value="_cart">
+        $get_cart = "select * from cart where ip_add='$ip_add'";
 
-<input type="hidden" name="upload" value="1">
+        $run_cart = mysqli_query($con, $get_cart);
 
-<input type="hidden" name="currency_code" value="<?php echo $paypal_currency_code; ?>">
+        while ($row_cart = mysqli_fetch_array($run_cart)) {
 
-<?php if(count($physical_products) > 0 ){ ?>
+          $pro_id = $row_cart['p_id'];
 
-<input type="hidden" name="return" value="http://localhost/ecommerce_project/paypal_order.php?c_id=<?php echo $customer_id; ?>&amount=<?php echo $total_cart_price; ?>">
+          $pro_qty = $row_cart['qty'];
 
-<?php }else{ ?>
+          $pro_price = $row_cart['p_price'];
 
-<input type="hidden" name="return" value="http://localhost/ecommerce_project/paypal_order.php?c_id=<?php echo $customer_id; ?>&amount=<?php echo $total; ?>">
+          $get_products = "select * from products where product_id='$pro_id'";
 
-<?php } ?>
+          $run_products = mysqli_query($con, $get_products);
 
-<input type="hidden" name="cancel_return" value="http://localhost/ecommerce_project/checkout.php">
+          $row_products = mysqli_fetch_array($run_products);
 
-<?php
+          $product_title = $row_products['product_title'];
 
-$i = 0;
+          $i++;
 
-$get_cart = "select * from cart where ip_add='$ip_add'";
+        ?>
 
-$run_cart = mysqli_query($con,$get_cart);
+          <input type="hidden" name="item_name_<?php echo $i; ?>" value="<?php echo $product_title; ?>">
 
-while($row_cart = mysqli_fetch_array($run_cart)){
+          <input type="hidden" name="item_number_<?php echo $i; ?>" value="<?php echo $i; ?>">
 
-$pro_id = $row_cart['p_id'];
+          <input type="hidden" name="amount_<?php echo $i; ?>" value="<?php echo $pro_price; ?>">
 
-$pro_qty = $row_cart['qty'];
+          <input type="hidden" name="quantity_<?php echo $i; ?>" value="<?php echo $pro_qty; ?>">
 
-$pro_price = $row_cart['p_price'];
+        <?php } ?>
 
-$get_products = "select * from products where product_id='$pro_id'";
+        <input type="hidden" name="shipping_1" value="<?php echo @$_SESSION["shipping_cost"]; ?>">
 
-$run_products = mysqli_query($con,$get_products);
+        <input type="hidden" name="first_name" value="<?php echo $billing_first_name; ?>">
 
-$row_products = mysqli_fetch_array($run_products);
+        <input type="hidden" name="last_name" value="<?php echo $billing_last_name; ?>">
 
-$product_title = $row_products['product_title'];
+        <input type="hidden" name="address1" value="<?php echo $billing_address_1; ?>">
 
-$i++;
+        <input type="hidden" name="address2" value="<?php echo $billing_address_2; ?>">
 
-?>
+        <input type="hidden" name="city" value="<?php echo $billing_city; ?>">
 
-<input type="hidden" name="item_name_<?php echo $i; ?>" value="<?php echo $product_title; ?>" >
+        <input type="hidden" name="state" value="<?php echo $billing_state; ?>">
 
-<input type="hidden" name="item_number_<?php echo $i; ?>" value="<?php echo $i; ?>" >
+        <input type="hidden" name="zip" value="<?php echo $billing_postcode; ?>">
 
-<input type="hidden" name="amount_<?php echo $i; ?>" value="<?php echo $pro_price; ?>" >
+        <input type="hidden" name="night_phone_a" value="<?php echo $customer_contact; ?>">
 
-<input type="hidden" name="quantity_<?php echo $i; ?>" value="<?php echo $pro_qty; ?>" >
+        <input type="hidden" name="email" value="<?php echo $customer_email; ?>">
 
-<?php } ?>
+        <input type="submit" id="paypal-submit" name="submit" value="Proceed With PayPal" class="btn btn-success btn-lg" style="border-radius:0px;">
 
-<input type="hidden" name="shipping_1" value="<?php echo @$_SESSION["shipping_cost"]; ?>">
+      </form><!-- PayPal form Ends -->
 
-<input type="hidden" name="first_name" value="<?php echo $billing_first_name; ?>">
+    <?php } ?>
 
-<input type="hidden" name="last_name" value="<?php echo $billing_last_name; ?>">
 
-<input type="hidden" name="address1" value="<?php echo $billing_address_1; ?>">
 
-<input type="hidden" name="address2" value="<?php echo $billing_address_2; ?>">
+    <?php if ($enable_pesapal == "yes") { ?>
+      <form id="pesapal_form" action="pesapal_charge.php" method="post">
+        <input type="text" name="phone_number" placeholder="Enter Phone Number" class="form-control" required>
+        <input type="hidden" name="total_amount" value="<?php echo $total_cart_price; ?>">
+        <input type="submit" id="pesa-submit" class="btn btn-success btn-lg" value="Procced With PesaPal" style="border-radius:0px;">
+      </form>
+    <?php } ?>
 
-<input type="hidden" name="city" value="<?php echo $billing_city; ?>">
-
-<input type="hidden" name="state" value="<?php echo $billing_state; ?>">
-
-<input type="hidden" name="zip" value="<?php echo $billing_postcode; ?>">
-
-<input type="hidden" name="night_phone_a" value="<?php echo $customer_contact; ?>">
-
-<input type="hidden" name="email" value="<?php echo $customer_email; ?>">
-
-<input type="submit" id="paypal-submit" name="submit" value="Proceed With PayPal" class="btn btn-success btn-lg" style="border-radius:0px;">
-
-</form><!-- PayPal form Ends -->
-
-<?php } ?>
-
-</td>
+  </td>
 
 </tr>
 
 <script>
+  $(document).ready(function() {
 
-$(document).ready(function(){
-	
-<?php if($_SESSION["payment_method"] == "pay_offline"){ ?>
+    <?php if ($_SESSION["payment_method"] == "pay_offline") { ?>
 
-$('#offline_desc').show();
+      $('#offline_desc').show();
 
-$('#offline_form').show();
+      $('#offline_form').show();
 
-$('#stripe_desc').hide();	
-		
-$('#stripe_form').hide();	
+      $('#stripe_desc').hide();
 
-$('#paypal_desc').hide();	
+      $('#stripe_form').hide();
 
-$('#paypal_form').hide();
+      $('#paypal_desc').hide();
 
-<?php }elseif($_SESSION["payment_method"] == "stripe"){ ?>
+      $('#paypal_form').hide();
 
-$('#offline_desc').hide();
+    <?php } elseif ($_SESSION["payment_method"] == "stripe") { ?>
 
-$('#offline_form').hide();
+      $('#offline_desc').hide();
 
-$('#stripe_desc').show();	
-		
-$('#stripe_form').show();	
+      $('#offline_form').hide();
 
-$('#paypal_desc').hide();	
+      $('#stripe_desc').show();
 
-$('#paypal_form').hide();
+      $('#stripe_form').show();
 
-<?php }elseif($_SESSION["payment_method"] == "paypal"){ ?>
+      $('#paypal_desc').hide();
 
-$('#offline_desc').hide();
+      $('#paypal_form').hide();
 
-$('#offline_form').hide();
+    <?php } elseif ($_SESSION["payment_method"] == "paypal") { ?>
 
-$('#stripe_desc').hide();	
-		
-$('#stripe_form').hide();	
+      $('#offline_desc').hide();
 
-$('#paypal_desc').show();
+      $('#offline_form').hide();
 
-$('#paypal_form').show();
+      $('#stripe_desc').hide();
 
-<?php } ?>
+      $('#stripe_form').hide();
 
-$('#paypal').click(function(){
+      $('#paypal_desc').show();
 
-$('#offline_desc').hide();
-$('#offline_form').hide();	
-$('#stripe_desc').hide();
-$('#stripe_form').hide();
-$('#paypal_desc').show();
-$('#paypal_form').show();
+      $('#paypal_form').show();
 
-});
+    <?php } ?>
 
-$('#stripe').click(function(){
+    $('#paypal').click(function() {
 
-$('#offline_desc').hide();
-$('#offline_form').hide();
-$('#paypal_desc').hide();
-$('#paypal_form').hide();
-$('#stripe_desc').show();
-$('#stripe_form').show();
+      $('#offline_desc').hide();
+      $('#offline_form').hide();
+      $('#stripe_desc').hide();
+      $('#stripe_form').hide();
+      $('#paypal_desc').show();
+      $('#paypal_form').show();
 
-});
+    });
 
-$('#offline').click(function(){
+    $('#stripe').click(function() {
 
-$('#stripe_desc').hide();
-$('#stripe_form').hide(); 
-$('#paypal_desc').hide();
-$('#paypal_form').hide();
-$('#offline_desc').show();
-$('#offline_form').show();
+      $('#offline_desc').hide();
+      $('#offline_form').hide();
+      $('#paypal_desc').hide();
+      $('#paypal_form').hide();
+      $('#stripe_desc').show();
+      $('#stripe_form').show();
 
-});
+    });
 
+    $('#offline').click(function() {
 
-$('#offline-submit').click(function(event){
+      $('#stripe_desc').hide();
+      $('#stripe_form').hide();
+      $('#paypal_desc').hide();
+      $('#paypal_form').hide();
+      $('#offline_desc').show();
+      $('#offline_form').show();
 
-event.preventDefault();
-
-$('#shipping-billing-details-form').submit(function(event){
-	
-event.preventDefault();
-	
-$('#offline-submit').click();
-	
-});
-
-$('#shipping-billing-form-submit').click();
-
-}); 
-
-	
-$('#stripe-submit').click(function(event){
-	
-event.preventDefault();
-			
-$('#shipping-billing-details-form').submit(function(event){
-	
-event.preventDefault();
-
-var $button = $('#stripe-submit'),
-$form = $button.parents('form');
-var opts = $.extend({}, $button.data(), {
-token: function(result) {
-$form.append($('<input>').attr({ type: 'hidden', name: 'stripeToken', value: result.id })).submit();
-}
-});
-
-StripeCheckout.open(opts);	
-
-});
-
-$('#shipping-billing-form-submit').click();
-
-});
+    });
 
 
-$('#paypal-submit').click(function(event){
+    $('#offline-submit').click(function(event) {
 
-event.preventDefault();
+      event.preventDefault();
 
-$('#shipping-billing-details-form').submit(function(event){
-	
-event.preventDefault();
-	
-$('#paypal-submit').click();
-	
-});
+      $('#shipping-billing-details-form').submit(function(event) {
 
-$('#shipping-billing-form-submit').click();
+        event.preventDefault();
 
-});  
+        $('#offline-submit').click();
 
-	
-});
-	
+      });
+
+      $('#shipping-billing-form-submit').click();
+
+    });
+
+
+    $('#stripe-submit').click(function(event) {
+
+      event.preventDefault();
+
+      $('#shipping-billing-details-form').submit(function(event) {
+
+        event.preventDefault();
+
+        var $button = $('#stripe-submit'),
+          $form = $button.parents('form');
+        var opts = $.extend({}, $button.data(), {
+          token: function(result) {
+            $form.append($('<input>').attr({
+              type: 'hidden',
+              name: 'stripeToken',
+              value: result.id
+            })).submit();
+          }
+        });
+
+        StripeCheckout.open(opts);
+
+      });
+
+      $('#shipping-billing-form-submit').click();
+
+    });
+
+
+    $('#paypal-submit').click(function(event) {
+
+      event.preventDefault();
+
+      $('#shipping-billing-details-form').submit(function(event) {
+
+        event.preventDefault();
+
+        $('#paypal-submit').click();
+
+      });
+
+      $('#shipping-billing-form-submit').click();
+
+    });
+
+
+  });
 </script>

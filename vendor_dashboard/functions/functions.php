@@ -1,43 +1,47 @@
 <?php
 
-$db = mysqli_connect("localhost","root","","php_ecommerce_project");
+$db = mysqli_connect("localhost", "root", "023Giants!", "php_ecommerce_project");
 
 /// IP address code starts /////
-function getRealUserIp(){
-    switch(true){
-      case (!empty($_SERVER['HTTP_X_REAL_IP'])) : return $_SERVER['HTTP_X_REAL_IP'];
-      case (!empty($_SERVER['HTTP_CLIENT_IP'])) : return $_SERVER['HTTP_CLIENT_IP'];
-      case (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) : return $_SERVER['HTTP_X_FORWARDED_FOR'];
-      default : return $_SERVER['REMOTE_ADDR'];
-    }
- }
+function getRealUserIp()
+{
+  switch (true) {
+    case (!empty($_SERVER['HTTP_X_REAL_IP'])):
+      return $_SERVER['HTTP_X_REAL_IP'];
+    case (!empty($_SERVER['HTTP_CLIENT_IP'])):
+      return $_SERVER['HTTP_CLIENT_IP'];
+    case (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])):
+      return $_SERVER['HTTP_X_FORWARDED_FOR'];
+    default:
+      return $_SERVER['REMOTE_ADDR'];
+  }
+}
 /// IP address code Ends /////
 
 
 // items function Starts ///
 
-function items(){
+function items()
+{
 
-global $db;
+  global $db;
 
-$count_items = 0;
+  $count_items = 0;
 
-$ip_add = getRealUserIp();
+  $ip_add = getRealUserIp();
 
-$get_items = "select * from cart where ip_add='$ip_add'";
+  $get_items = "select * from cart where ip_add='$ip_add'";
 
-$run_items = mysqli_query($db,$get_items);
+  $run_items = mysqli_query($db, $get_items);
 
-while($row_items = mysqli_fetch_array($run_items)){
+  while ($row_items = mysqli_fetch_array($run_items)) {
 
-$product_qty = $row_items['qty'];
+    $product_qty = $row_items['qty'];
 
-$count_items += $product_qty;
+    $count_items += $product_qty;
+  }
 
-}
-
-echo $count_items;
-
+  echo $count_items;
 }
 
 
@@ -45,40 +49,32 @@ echo $count_items;
 
 // total_price function Starts //
 
-function total_price(){
+function total_price()
+{
 
-global $db;
+  global $db;
 
-$ip_add = getRealUserIp();
+  $ip_add = getRealUserIp();
 
-$total = 0;
+  $total = 0;
 
-$select_cart = "select * from cart where ip_add='$ip_add'";
+  $select_cart = "select * from cart where ip_add='$ip_add'";
 
-$run_cart = mysqli_query($db,$select_cart);
+  $run_cart = mysqli_query($db, $select_cart);
 
-while($record=mysqli_fetch_array($run_cart)){
+  while ($record = mysqli_fetch_array($run_cart)) {
 
-$pro_id = $record['p_id'];
+    $pro_id = $record['p_id'];
 
-$pro_qty = $record['qty'];
-
-
-$sub_total = $record['p_price']*$pro_qty;
-
-$total += $sub_total;
+    $pro_qty = $record['qty'];
 
 
+    $sub_total = $record['p_price'] * $pro_qty;
 
+    $total += $sub_total;
+  }
 
-
-
-}
-
-echo "$" . $total;
-
-
-
+  echo "$" . $total;
 }
 
 
@@ -87,63 +83,58 @@ echo "$" . $total;
 
 // getPro function Starts //
 
-function getPro(){
+function getPro()
+{
 
-global $db;
+  global $db;
 
-$get_products = "select * from products order by 1 DESC LIMIT 0,8";
+  $get_products = "select * from products order by 1 DESC LIMIT 0,8";
 
-$run_products = mysqli_query($db,$get_products);
+  $run_products = mysqli_query($db, $get_products);
 
-while($row_products=mysqli_fetch_array($run_products)){
+  while ($row_products = mysqli_fetch_array($run_products)) {
 
-$pro_id = $row_products['product_id'];
+    $pro_id = $row_products['product_id'];
 
-$pro_title = $row_products['product_title'];
+    $pro_title = $row_products['product_title'];
 
-$pro_price = $row_products['product_price'];
+    $pro_price = $row_products['product_price'];
 
-$pro_img1 = $row_products['product_img1'];
+    $pro_img1 = $row_products['product_img1'];
 
-$pro_label = $row_products['product_label'];
+    $pro_label = $row_products['product_label'];
 
-$manufacturer_id = $row_products['manufacturer_id'];
+    $manufacturer_id = $row_products['manufacturer_id'];
 
-$get_manufacturer = "select * from manufacturers where manufacturer_id='$manufacturer_id'";
+    $get_manufacturer = "select * from manufacturers where manufacturer_id='$manufacturer_id'";
 
-$run_manufacturer = mysqli_query($db,$get_manufacturer);
+    $run_manufacturer = mysqli_query($db, $get_manufacturer);
 
-$row_manufacturer = mysqli_fetch_array($run_manufacturer);
+    $row_manufacturer = mysqli_fetch_array($run_manufacturer);
 
-$manufacturer_name = $row_manufacturer['manufacturer_title'];
+    $manufacturer_name = $row_manufacturer['manufacturer_title'];
 
-$pro_psp_price = $row_products['product_psp_price'];
+    $pro_psp_price = $row_products['product_psp_price'];
 
-$pro_url = $row_products['product_url'];
+    $pro_url = $row_products['product_url'];
 
-if($pro_label == "Sale" or $pro_label == "Gift"){
+    if ($pro_label == "Sale" or $pro_label == "Gift") {
 
-$product_price = "<del> Ksh $pro_price </del>";
+      $product_price = "<del> Ksh $pro_price </del>";
 
-$product_psp_price = "| Ksh $pro_psp_price";
+      $product_psp_price = "| Ksh $pro_psp_price";
+    } else {
 
-}
-else{
+      $product_psp_price = "";
 
-$product_psp_price = "";
-
-$product_price = "Ksh $pro_price";
-
-}
+      $product_price = "Ksh $pro_price";
+    }
 
 
-if($pro_label == ""){
+    if ($pro_label == "") {
+    } else {
 
-
-}
-else{
-
-$product_label = "
+      $product_label = "
 
 <a class='label sale' href='#' style='color:black;'>
 
@@ -154,11 +145,10 @@ $product_label = "
 </a>
 
 ";
+    }
 
-}
 
-
-echo "
+    echo "
 
 <div class='col-md-4 col-sm-6 single' >
 
@@ -207,9 +197,7 @@ $product_label
 </div>
 
 ";
-
-}
-
+  }
 }
 
 // getPro function Ends //
@@ -218,107 +206,102 @@ $product_label
 
 /// getPaginator Function Starts ///
 
-function getPaginator(){
+function getPaginator()
+{
 
-/// getPaginator Function Code Starts ///
+  /// getPaginator Function Code Starts ///
 
-$per_page = 6;
+  $per_page = 6;
 
-global $db;
+  global $db;
 
-$aWhere = array();
+  $aWhere = array();
 
-$aPath = '';
+  $aPath = '';
 
-/// Manufacturers Code Starts ///
+  /// Manufacturers Code Starts ///
 
-if(isset($_REQUEST['man'])&&is_array($_REQUEST['man'])){
+  if (isset($_REQUEST['man']) && is_array($_REQUEST['man'])) {
 
-foreach($_REQUEST['man'] as $sKey=>$sVal){
+    foreach ($_REQUEST['man'] as $sKey => $sVal) {
 
-if((int)$sVal!=0){
+      if ((int)$sVal != 0) {
 
-$aWhere[] = 'manufacturer_id='.(int)$sVal;
+        $aWhere[] = 'manufacturer_id=' . (int)$sVal;
 
-$aPath .= 'man[]='.(int)$sVal.'&';
+        $aPath .= 'man[]=' . (int)$sVal . '&';
+      }
+    }
+  }
 
-}
+  /// Manufacturers Code Ends ///
 
-}
+  /// Products Categories Code Starts ///
 
-}
+  if (isset($_REQUEST['p_cat']) && is_array($_REQUEST['p_cat'])) {
 
-/// Manufacturers Code Ends ///
+    foreach ($_REQUEST['p_cat'] as $sKey => $sVal) {
 
-/// Products Categories Code Starts ///
+      if ((int)$sVal != 0) {
 
-if(isset($_REQUEST['p_cat'])&&is_array($_REQUEST['p_cat'])){
+        $aWhere[] = 'p_cat_id=' . (int)$sVal;
 
-foreach($_REQUEST['p_cat'] as $sKey=>$sVal){
+        $aPath .= 'p_cat[]=' . (int)$sVal . '&';
+      }
+    }
+  }
 
-if((int)$sVal!=0){
+  /// Products Categories Code Ends ///
 
-$aWhere[] = 'p_cat_id='.(int)$sVal;
+  /// Categories Code Starts ///
 
-$aPath .= 'p_cat[]='.(int)$sVal.'&';
+  if (isset($_REQUEST['cat']) && is_array($_REQUEST['cat'])) {
 
-}
+    foreach ($_REQUEST['cat'] as $sKey => $sVal) {
 
-}
+      if ((int)$sVal != 0) {
 
-}
+        $aWhere[] = 'cat_id=' . (int)$sVal;
 
-/// Products Categories Code Ends ///
+        $aPath .= 'cat[]=' . (int)$sVal . '&';
+      }
+    }
+  }
 
-/// Categories Code Starts ///
+  /// Categories Code Ends ///
 
-if(isset($_REQUEST['cat'])&&is_array($_REQUEST['cat'])){
+  $sWhere = (count($aWhere) > 0 ? ' WHERE ' . implode(' or ', $aWhere) : '');
 
-foreach($_REQUEST['cat'] as $sKey=>$sVal){
+  $query = "select * from products " . $sWhere;
 
-if((int)$sVal!=0){
+  $result = mysqli_query($db, $query);
 
-$aWhere[] = 'cat_id='.(int)$sVal;
+  $total_records = mysqli_num_rows($result);
 
-$aPath .= 'cat[]='.(int)$sVal.'&';
+  $total_pages = ceil($total_records / $per_page);
 
-}
+  echo "<li><a href='shop.php?page=1";
 
-}
+  if (!empty($aPath)) {
+    echo "&" . $aPath;
+  }
 
-}
+  echo "' >" . 'First Page' . "</a></li>";
 
-/// Categories Code Ends ///
+  for ($i = 1; $i <= $total_pages; $i++) {
 
-$sWhere = (count($aWhere)>0?' WHERE '.implode(' or ',$aWhere):'');
+    echo "<li><a href='shop.php?page=" . $i . (!empty($aPath) ? '&' . $aPath : '') . "' >" . $i . "</a></li>";
+  };
 
-$query = "select * from products ".$sWhere;
+  echo "<li><a href='shop.php?page=$total_pages";
 
-$result = mysqli_query($db,$query);
+  if (!empty($aPath)) {
+    echo "&" . $aPath;
+  }
 
-$total_records = mysqli_num_rows($result);
+  echo "' >" . 'Last Page' . "</a></li>";
 
-$total_pages = ceil($total_records / $per_page);
-
-echo "<li><a href='shop.php?page=1";
-
-if(!empty($aPath)){ echo "&".$aPath; }
-
-echo "' >".'First Page'."</a></li>";
-
-for ($i=1; $i<=$total_pages; $i++){
-
-echo "<li><a href='shop.php?page=".$i.(!empty($aPath)?'&'.$aPath:'')."' >".$i."</a></li>";
-
-};
-
-echo "<li><a href='shop.php?page=$total_pages";
-
-if(!empty($aPath)){ echo "&".$aPath; }
-
-echo "' >".'Last Page'."</a></li>";
-
-/// getPaginator Function Code Ends ///
+  /// getPaginator Function Code Ends ///
 
 }
 
@@ -327,140 +310,124 @@ echo "' >".'Last Page'."</a></li>";
 
 /// getProducts Function Starts ///
 
-function getProducts(){
+function getProducts()
+{
 
-/// getProducts function Code Starts ///
+  /// getProducts function Code Starts ///
 
-global $db;
+  global $db;
 
-$aWhere = array();
+  $aWhere = array();
 
-/// Manufacturers Code Starts ///
+  /// Manufacturers Code Starts ///
 
-if(isset($_REQUEST['man'])&&is_array($_REQUEST['man'])){
+  if (isset($_REQUEST['man']) && is_array($_REQUEST['man'])) {
 
-foreach($_REQUEST['man'] as $sKey=>$sVal){
+    foreach ($_REQUEST['man'] as $sKey => $sVal) {
 
-if((int)$sVal!=0){
+      if ((int)$sVal != 0) {
 
-$aWhere[] = 'manufacturer_id='.(int)$sVal;
+        $aWhere[] = 'manufacturer_id=' . (int)$sVal;
+      }
+    }
+  }
 
-}
+  /// Manufacturers Code Ends ///
 
-}
+  /// Products Categories Code Starts ///
 
-}
+  if (isset($_REQUEST['p_cat']) && is_array($_REQUEST['p_cat'])) {
 
-/// Manufacturers Code Ends ///
+    foreach ($_REQUEST['p_cat'] as $sKey => $sVal) {
 
-/// Products Categories Code Starts ///
+      if ((int)$sVal != 0) {
 
-if(isset($_REQUEST['p_cat'])&&is_array($_REQUEST['p_cat'])){
+        $aWhere[] = 'p_cat_id=' . (int)$sVal;
+      }
+    }
+  }
 
-foreach($_REQUEST['p_cat'] as $sKey=>$sVal){
+  /// Products Categories Code Ends ///
 
-if((int)$sVal!=0){
+  /// Categories Code Starts ///
 
-$aWhere[] = 'p_cat_id='.(int)$sVal;
+  if (isset($_REQUEST['cat']) && is_array($_REQUEST['cat'])) {
 
-}
+    foreach ($_REQUEST['cat'] as $sKey => $sVal) {
 
-}
+      if ((int)$sVal != 0) {
 
-}
+        $aWhere[] = 'cat_id=' . (int)$sVal;
+      }
+    }
+  }
 
-/// Products Categories Code Ends ///
+  /// Categories Code Ends ///
 
-/// Categories Code Starts ///
+  $per_page = 6;
 
-if(isset($_REQUEST['cat'])&&is_array($_REQUEST['cat'])){
+  if (isset($_GET['page'])) {
 
-foreach($_REQUEST['cat'] as $sKey=>$sVal){
+    $page = $_GET['page'];
+  } else {
 
-if((int)$sVal!=0){
+    $page = 1;
+  }
 
-$aWhere[] = 'cat_id='.(int)$sVal;
+  $start_from = ($page - 1) * $per_page;
 
-}
+  $sLimit = " order by 1 DESC LIMIT $start_from,$per_page";
 
-}
+  $sWhere = (count($aWhere) > 0 ? ' WHERE ' . implode(' or ', $aWhere) : '') . $sLimit;
 
-}
+  $get_products = "select * from products  " . $sWhere;
 
-/// Categories Code Ends ///
+  $run_products = mysqli_query($db, $get_products);
 
-$per_page=6;
+  while ($row_products = mysqli_fetch_array($run_products)) {
 
-if(isset($_GET['page'])){
+    $pro_id = $row_products['product_id'];
 
-$page = $_GET['page'];
+    $pro_title = $row_products['product_title'];
 
-}else {
+    $pro_price = $row_products['product_price'];
 
-$page=1;
+    $pro_img1 = $row_products['product_img1'];
 
-}
+    $pro_label = $row_products['product_label'];
 
-$start_from = ($page-1) * $per_page ;
+    $manufacturer_id = $row_products['manufacturer_id'];
 
-$sLimit = " order by 1 DESC LIMIT $start_from,$per_page";
+    $get_manufacturer = "select * from manufacturers where manufacturer_id='$manufacturer_id'";
 
-$sWhere = (count($aWhere)>0?' WHERE '.implode(' or ',$aWhere):'').$sLimit;
+    $run_manufacturer = mysqli_query($db, $get_manufacturer);
 
-$get_products = "select * from products  ".$sWhere;
+    $row_manufacturer = mysqli_fetch_array($run_manufacturer);
 
-$run_products = mysqli_query($db,$get_products);
+    $manufacturer_name = $row_manufacturer['manufacturer_title'];
 
-while($row_products=mysqli_fetch_array($run_products)){
+    $pro_psp_price = $row_products['product_psp_price'];
 
-$pro_id = $row_products['product_id'];
+    $pro_url = $row_products['product_url'];
 
-$pro_title = $row_products['product_title'];
 
-$pro_price = $row_products['product_price'];
+    if ($pro_label == "Sale" or $pro_label == "Gift") {
 
-$pro_img1 = $row_products['product_img1'];
+      $product_price = "<del> $$pro_price </del>";
 
-$pro_label = $row_products['product_label'];
+      $product_psp_price = "| $$pro_psp_price";
+    } else {
 
-$manufacturer_id = $row_products['manufacturer_id'];
+      $product_psp_price = "";
 
-$get_manufacturer = "select * from manufacturers where manufacturer_id='$manufacturer_id'";
+      $product_price = "$$pro_price";
+    }
 
-$run_manufacturer = mysqli_query($db,$get_manufacturer);
 
-$row_manufacturer = mysqli_fetch_array($run_manufacturer);
+    if ($pro_label == "") {
+    } else {
 
-$manufacturer_name = $row_manufacturer['manufacturer_title'];
-
-$pro_psp_price = $row_products['product_psp_price'];
-
-$pro_url = $row_products['product_url'];
-
-
-if($pro_label == "Sale" or $pro_label == "Gift"){
-
-$product_price = "<del> $$pro_price </del>";
-
-$product_psp_price = "| $$pro_psp_price";
-
-}
-else{
-
-$product_psp_price = "";
-
-$product_price = "$$pro_price";
-
-}
-
-
-if($pro_label == ""){
-
-
-}
-else{
-
-$product_label = "
+      $product_label = "
 
 <a class='label sale' href='#' style='color:black;'>
 
@@ -471,11 +438,10 @@ $product_label = "
 </a>
 
 ";
+    }
 
-}
 
-
-echo "
+    echo "
 
 <div class='col-md-4 col-sm-6 center-responsive' >
 
@@ -524,14 +490,10 @@ $product_label
 </div>
 
 ";
-
-}
-/// getProducts function Code Ends ///
+  }
+  /// getProducts function Code Ends ///
 
 }
 
 
 /// getProducts Function Ends ///
-
- 
-?>

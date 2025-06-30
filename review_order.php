@@ -91,37 +91,37 @@ if ($paypal_sandbox == "on") {
 
         $row_addresses = mysqli_fetch_array($run_customers_addresses);
 
-        $billing_first_name = $row_addresses["billing_first_name"];
+        $billing_first_name = $row_addresses["billing_first_name"] ?? '';
 
-        $billing_last_name = $row_addresses["billing_last_name"];
+        $billing_last_name = $row_addresses["billing_last_name"]  ?? '';
 
-        $billing_country = $row_addresses["billing_country"];
+        $billing_country = $row_addresses["billing_country"]  ?? '';
 
-        $billing_address_1 = $row_addresses["billing_address_1"];
+        $billing_address_1 = $row_addresses["billing_address_1"]  ?? '';
 
-        $billing_address_2 = $row_addresses["billing_address_2"];
+        $billing_address_2 = $row_addresses["billing_address_2"]  ?? '';
 
-        $billing_state = $row_addresses["billing_state"];
+        $billing_state = $row_addresses["billing_state"]  ?? '';
 
-        $billing_city = $row_addresses["billing_city"];
+        $billing_city = $row_addresses["billing_city"]  ?? '';
 
-        $billing_postcode = $row_addresses["billing_postcode"];
+        $billing_postcode = $row_addresses["billing_postcode"]  ?? '';
 
-        $shipping_first_name = $row_addresses["shipping_first_name"];
+        $shipping_first_name = $row_addresses["shipping_first_name"]  ?? '';
 
-        $shipping_last_name = $row_addresses["shipping_last_name"];
+        $shipping_last_name = $row_addresses["shipping_last_name"]  ?? '';
 
-        $shipping_country = $row_addresses["shipping_country"];
+        $shipping_country = $row_addresses["shipping_country"]  ?? '';
 
-        $shipping_address_1 = $row_addresses["shipping_address_1"];
+        $shipping_address_1 = $row_addresses["shipping_address_1"]  ?? '';
 
-        $shipping_address_2 = $row_addresses["shipping_address_2"];
+        $shipping_address_2 = $row_addresses["shipping_address_2"]  ?? '';
 
-        $shipping_state = $row_addresses["shipping_state"];
+        $shipping_state = $row_addresses["shipping_state"]  ?? '';
 
-        $shipping_city = $row_addresses["shipping_city"];
+        $shipping_city = $row_addresses["shipping_city"]  ?? '';
 
-        $shipping_postcode = $row_addresses["shipping_postcode"];
+        $shipping_postcode = $row_addresses["shipping_postcode"]  ?? '';
 
         $physical_products = array();
 
@@ -561,7 +561,7 @@ if ($paypal_sandbox == "on") {
 
                 $row_customer = mysqli_fetch_array($run_customer);
 
-                $vendor_name = $row_customer['customer_name'];
+                $vendor_name = $row_customer['customer_name'] ?? '';
               }
 
             ?>
@@ -658,7 +658,7 @@ if ($paypal_sandbox == "on") {
 
                           $row_customer = mysqli_fetch_array($run_customer);
 
-                          $vendor_name = $row_customer['customer_name'];
+                          $vendor_name = $row_customer['customer_name'] ?? '';
                         }
 
                     ?>
@@ -1452,7 +1452,7 @@ ORDER BY type_order ASC
 
                 <?php if ($enable_pesapal == "yes") { ?>
                   <form id="pesapal_form" action="pesapal_charge.php" method="post">
-                   <input type="text" name="phone_number" placeholder="Enter Phone Number" class="form-control" required>
+                    <input type="text" name="phone_number" placeholder="Enter Phone Number" class="form-control" required>
                     <input type="hidden" name="total_amount" value="<?php echo $total_cart_price; ?>">
                     <input type="submit" id="pesa-submit" class="btn btn-success btn-lg" value="Procced With PesaPal" style="border-radius:0px;">
                   </form>
@@ -1461,7 +1461,6 @@ ORDER BY type_order ASC
 
                 <?php if ($enable_umspay == "yes") { ?>
                   <style>
-
                     .form-group {
                       margin-bottom: 15px;
                     }
