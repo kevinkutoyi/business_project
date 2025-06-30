@@ -229,7 +229,7 @@ while ($row_cart = mysqli_fetch_array($run_cart)) {
 
     <th colspan="2">
 
-      <p class="shipping-header text-muted"> <i class="fa fa-truck"></i> Shipping: </p>
+      <!-- <p class="shipping-header text-muted"> <i class="fa fa-truck"></i> Shipping: </p> -->
 
       <ul class="shipping-ul-list list-unstyled">
 
@@ -265,7 +265,7 @@ while ($row_cart = mysqli_fetch_array($run_cart)) {
 
         ?>
 
-            <div class="shipping-vendor-header"> <?php echo $vendor_name; ?> Shipping: </div>
+            <!-- <div class="shipping-vendor-header"> <?php echo $vendor_name; ?> Shipping: </div> -->
 
             <?php
 
@@ -277,7 +277,7 @@ while ($row_cart = mysqli_fetch_array($run_cart)) {
 
 <li> 
 
-<p> There are no shipping methods available. Please double check your address, or contact us if you need any help. </p> 
+ <p> </p> 
 
 </li>
 
@@ -344,7 +344,7 @@ while ($row_cart = mysqli_fetch_array($run_cart)) {
 
 <li> 
 
-<p> There are no shipping methods available. Please double check your address, or contact us if you need any help. </p> 
+ <p> </p>
 
 </li>
 
@@ -411,7 +411,7 @@ while ($row_cart = mysqli_fetch_array($run_cart)) {
 
 <li> 
 
-<p> There are no shipping methods available. Please double check your address, or contact us if you need any help. </p> 
+<p>  </p> 
 
 </li>
 
@@ -578,7 +578,7 @@ ORDER BY type_order ASC
 
 <li> 
 
-<p> There are no shipping methods matched/available for your address, or contact us if you need any help. </p> 
+<p></p> 
 
 </li>
 
@@ -812,43 +812,17 @@ ORDER BY type_order ASC
 
 <tr>
 
-  <th colspan="2">
 
-    <input id="offline" type="radio" name="payment_method" value="pay_offline"
-
-      <?php if ($_SESSION["payment_method"] == "pay_offline") {
-        echo "checked";
-      } ?>>
-
-    <label for="offline"> Pay Offline </label>
-
-    <p id="offline_desc" class="text-muted">Make your payment directly into our bank account or Please send a check to Store Name, Store Street, Store Town, Store State / County, Store Postcode.</p>
-
-  </th>
 
 </tr>
 
-<?php if ($enable_stripe == "yes") { ?>
 
-  <tr>
 
-    <th colspan="2">
+</th>
 
-      <input id="stripe" type="radio" name="payment_method" value="stripe"
+</tr>
 
-        <?php if ($_SESSION["payment_method"] == "stripe") {
-          echo "checked";
-        } ?>>
 
-      <label for="stripe">Credit Card (Stripe)</label>
-
-      <p id="stripe_desc" class="text-muted">Pay with your credit card via Stripe. TEST MODE ENABLED. In test mode, you can use the card number 4242424242424242 with any CVC and a valid expiration date or check the documentation "Testing Stripe" for more card numbers.</p>
-
-    </th>
-
-  </tr>
-
-<?php } ?>
 
 <?php if ($enable_paypal == "yes") { ?>
 
@@ -888,7 +862,7 @@ ORDER BY type_order ASC
 
       <?php } ?>
 
-      <input type="submit" id="offline-submit" name="submit" value="Place Order" class="btn btn-success btn-lg" style="border-radius:0px;">
+      <!-- <input type="submit" id="offline-submit" name="submit" value="Place Order" class="btn btn-success btn-lg" style="border-radius:0px;"> -->
 
     </form><!-- offline Payment form Starts -->
 
@@ -909,27 +883,7 @@ ORDER BY type_order ASC
 
     ?>
 
-      <form id="stripe_form" action="stripe_charge.php" method="post">
 
-        <input type="hidden" name="total_amount" value="<?php echo $total_cart_price; ?>">
-
-        <input type="hidden" name="stripe_total_amount" value="<?php echo $stripe_total_amount; ?>">
-
-        <input
-          type="submit"
-          id="stripe-submit"
-          class="btn btn-success btn-lg"
-          value="Procced With Stripe"
-          style="border-radius:0px;"
-          data-name="Computerfever.com"
-          data-description="Pay With Credit Card"
-          data-image="images/stripe-logo.png"
-          data-key="<?php echo $stripe['publishable_key']; ?>"
-          data-amount="<?php echo $stripe_total_amount; ?>"
-          data-currency="<?php echo $stripe['currency_code']; ?>"
-          data-email="<?php echo $customer_email; ?>">
-
-      </form>
 
     <?php } ?>
 
@@ -1027,7 +981,7 @@ ORDER BY type_order ASC
       <form id="pesapal_form" action="pesapal_charge.php" method="post">
         <input type="text" name="phone_number" placeholder="Enter Phone Number" class="form-control" required>
         <input type="hidden" name="total_amount" value="<?php echo $total_cart_price; ?>">
-        <input type="submit" id="pesa-submit" class="btn btn-success btn-lg" value="Procced With PesaPal" style="border-radius:0px;">
+        <input type="submit" id="pesa-submit" class="btn btn-success btn-lg" value="Proceed With PesaPal" style="border-radius:0px;">
       </form>
     <?php } ?>
 
